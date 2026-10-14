@@ -33,9 +33,6 @@ namespace NookSetup
         public static readonly string DesktopLnk = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory), "Nook.lnk");
         public const string UninstallKey = @"Software\Microsoft\Windows\CurrentVersion\Uninstall\Nook";
         public const string RunKey = @"Software\Microsoft\Windows\CurrentVersion\Run";
-        public static bool De = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "de";
-
-        public static string T(string en, string de) { return De ? de : en; }
 
         [STAThread]
         static void Main(string[] args)
@@ -168,8 +165,7 @@ namespace NookSetup
             if (!silent)
             {
                 var r = MessageBox.Show(
-                    Program.T("Remove Nook?\n\nYes: also delete your settings and data\nNo: keep settings (config.json, data folder)",
-                              "Nook entfernen?\n\nJa: auch Einstellungen und Daten löschen\nNein: Einstellungen behalten (config.json, Ordner data)"),
+                    "Remove Nook?\n\nYes: also delete your settings and data\nNo: keep settings (config.json, data folder)",
                     "Nook", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
                 if (r == DialogResult.Cancel) return;
                 deleteData = r == DialogResult.Yes;
@@ -196,7 +192,7 @@ namespace NookSetup
                 }
             }
             if (!silent)
-                MessageBox.Show(Program.T("Nook has been removed.", "Nook wurde entfernt."), "Nook", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show("Nook has been removed.", "Nook", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
             // remove this temp copy shortly after exit
             try
@@ -316,87 +312,121 @@ namespace NookSetup
     // ------------------------------------------------------------------
     class SetupForm : Form
     {
-        static readonly Color Bg = Color.FromArgb(14, 14, 16), Surface = Color.FromArgb(28, 28, 31), Text_ = Color.FromArgb(242, 242, 240),
+        static readonly Color Bg = Color.FromArgb(14, 14, 16), Surface = Color.FromArgb(36, 36, 40), Fg = Color.FromArgb(242, 242, 240),
                               Muted = Color.FromArgb(150, 150, 156), Accent = Color.FromArgb(212, 178, 102);
         readonly CheckBox cbAuto, cbDesktop, cbLaunch;
         readonly Button btnInstall, btnCancel;
         readonly Label status;
+        readonly float k;
+
+        // pixels at 100 % -> pixels at the current display scaling
+        int P(int v) { return (int)Math.Round(v * k); }
 
         public SetupForm()
         {
+            using (var g = CreateGraphics()) k = g.DpiX / 96f;
             bool installed = File.Exists(Path.Combine(Program.InstallDir, "Nook.exe"));
+
             Text = "Nook Setup";
-            AutoScaleMode = AutoScaleMode.Dpi;
-            AutoScaleDimensions = new SizeF(96, 96);
-            FormBorderStyle = FormBorderStyle.FixedDialog;
+            AutoScaleMode = AutoScaleMode.None;
+            FormBorderStyle = FormBorderStyle.FixedSingle;
             MaximizeBox = false; MinimizeBox = false;
             StartPosition = FormStartPosition.CenterScreen;
-            ClientSize = new Size(480, 330);
-            BackColor = Bg; ForeColor = Text_;
+            BackColor = Bg; ForeColor = Fg;
             Font = new Font("Segoe UI", 10f);
+            AutoSize = true; AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            Padding = new Padding(P(28), P(22), P(28), P(22));
             try { Icon = Icon.ExtractAssociatedIcon(Assembly.GetExecutingAssembly().Location); } catch { }
 
-            var title = new Label { Text = "Nook", Font = new Font("Segoe UI Semibold", 20f), AutoSize = true, Location = new Point(28, 22), ForeColor = Text_ };
-            var ver = new Label { Text = "v" + SetupVersion.Value, AutoSize = true, Location = new Point(110, 36), ForeColor = Accent };
-            var sub = new Label
-            {
-                Text = installed
-                    ? Program.T("Nook is already installed. Setup will update it – your settings stay.", "Nook ist schon installiert. Setup aktualisiert es – deine Einstellungen bleiben.")
-                    : Program.T("A minimal taskbar replacement for Windows 11.\nInstalled for your user only – no administrator rights needed.", "Schlanker Taskleisten-Ersatz für Windows 11.\nWird nur für deinen Benutzer installiert – ohne Administratorrechte."),
-                Location = new Point(30, 72), Size = new Size(430, 46), ForeColor = Muted
-            };
-            var path = new Label { Text = Program.T("Folder: ", "Ordner: ") + Program.InstallDir, Location = new Point(30, 124), Size = new Size(430, 20), ForeColor = Muted, AutoEllipsis = true };
+            int textW = P(440);
+            var col = new FlowLayoutPanel { FlowDirection = FlowDirection.TopDown, WrapContents = false, AutoSize = true, AutoSizeMode = AutoSizeMode.GrowAndShrink, Margin = new Padding(0) };
 
-            cbAuto = Check(Program.T("Start Nook with Windows", "Nook mit Windows starten"), 156, true);
-            cbDesktop = Check(Program.T("Desktop shortcut", "Verknüpfung auf dem Desktop"), 184, false);
-            cbLaunch = Check(Program.T("Start Nook after setup", "Nook nach der Installation starten"), 212, true);
-            var startNote = new Label { Text = Program.T("A Start menu shortcut is always created.", "Eine Verknüpfung im Startmenü wird immer angelegt."), Location = new Point(30, 242), Size = new Size(430, 20), ForeColor = Muted, Font = new Font("Segoe UI", 8.5f) };
+            var head = new FlowLayoutPanel { FlowDirection = FlowDirection.LeftToRight, WrapContents = false, AutoSize = true, Margin = new Padding(0, 0, 0, P(6)) };
+            head.Controls.Add(new Label { Text = "Nook", Font = new Font("Segoe UI Semibold", 20f), AutoSize = true, ForeColor = Fg, Margin = new Padding(0) });
+            head.Controls.Add(new Label { Text = "v" + SetupVersion.Value, AutoSize = true, ForeColor = Accent, Margin = new Padding(P(6), P(16), 0, 0) });
+            col.Controls.Add(head);
 
-            status = new Label { Location = new Point(30, 284), Size = new Size(220, 24), ForeColor = Accent };
-            btnCancel = Btn(Program.T("Cancel", "Abbrechen"), 268, false);
-            btnInstall = Btn(installed ? Program.T("Update", "Aktualisieren") : Program.T("Install", "Installieren"), 372, true);
+            col.Controls.Add(Text_(installed
+                ? "Nook is already installed. Setup will update it, your settings stay."
+                : "A minimal taskbar replacement for Windows 11. Installed for your user only, no administrator rights needed.",
+                Muted, 10f, textW, P(10)));
+            col.Controls.Add(Text_("Folder: " + Program.InstallDir, Muted, 9f, textW, P(16)));
+
+            cbAuto = Check("Start Nook with Windows", true);
+            cbDesktop = Check("Create a desktop shortcut", false);
+            cbLaunch = Check("Start Nook when setup is done", true);
+            col.Controls.Add(cbAuto); col.Controls.Add(cbDesktop); col.Controls.Add(cbLaunch);
+            col.Controls.Add(Text_("A Start menu shortcut is always created.", Muted, 9f, textW, P(18)));
+
+            // bottom row: status left, buttons right
+            var bottom = new TableLayoutPanel { ColumnCount = 3, RowCount = 1, AutoSize = true, MinimumSize = new Size(textW, 0), Margin = new Padding(0) };
+            bottom.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+            bottom.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
+            bottom.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
+            status = new Label { AutoSize = true, ForeColor = Accent, Anchor = AnchorStyles.Left, Margin = new Padding(0) };
+            btnCancel = Btn("Cancel", false);
+            btnInstall = Btn(installed ? "Update" : "Install", true);
+            bottom.Controls.Add(status, 0, 0);
+            bottom.Controls.Add(btnCancel, 1, 0);
+            bottom.Controls.Add(btnInstall, 2, 0);
+            col.Controls.Add(bottom);
+
+            Controls.Add(col);
             btnCancel.Click += (s, e) => Close();
             btnInstall.Click += (s, e) => DoInstall();
             AcceptButton = btnInstall; CancelButton = btnCancel;
-
-            Controls.AddRange(new Control[] { title, ver, sub, path, cbAuto, cbDesktop, cbLaunch, startNote, status, btnCancel, btnInstall });
         }
 
-        CheckBox Check(string text, int y, bool on)
+        Label Text_(string text, Color color, float size, int width, int bottom)
         {
-            return new CheckBox { Text = text, Checked = on, Location = new Point(30, y), AutoSize = true, ForeColor = Text_, FlatStyle = FlatStyle.System };
+            return new Label
+            {
+                Text = text, ForeColor = color, Font = new Font("Segoe UI", size), AutoSize = true,
+                MaximumSize = new Size(width, 0), Margin = new Padding(0, 0, 0, bottom)
+            };
         }
 
-        Button Btn(string text, int x, bool primary)
+        CheckBox Check(string text, bool on)
+        {
+            return new CheckBox
+            {
+                Text = text, Checked = on, AutoSize = true, ForeColor = Fg, BackColor = Bg,
+                FlatStyle = FlatStyle.Standard, Margin = new Padding(0, 0, 0, P(8)), Cursor = Cursors.Hand
+            };
+        }
+
+        Button Btn(string text, bool primary)
         {
             var b = new Button
             {
-                Text = text, Location = new Point(x, 280), Size = new Size(94, 32), FlatStyle = FlatStyle.Flat,
-                BackColor = primary ? Accent : Surface, ForeColor = primary ? Color.FromArgb(24, 20, 12) : Text_, Cursor = Cursors.Hand
+                Text = text, AutoSize = true, AutoSizeMode = AutoSizeMode.GrowAndShrink, FlatStyle = FlatStyle.Flat,
+                Padding = new Padding(P(14), P(5), P(14), P(5)), Margin = new Padding(P(8), 0, 0, 0),
+                BackColor = primary ? Accent : Surface, ForeColor = primary ? Color.FromArgb(24, 20, 12) : Fg, Cursor = Cursors.Hand,
+                Font = new Font("Segoe UI Semibold", 10f)
             };
             b.FlatAppearance.BorderSize = 0;
+            b.FlatAppearance.MouseOverBackColor = primary ? Color.FromArgb(226, 196, 128) : Color.FromArgb(50, 50, 55);
             return b;
         }
 
         void DoInstall()
         {
             btnInstall.Enabled = btnCancel.Enabled = false;
-            status.Text = Program.T("Installing …", "Installiere …");
+            status.Text = "Installing …";
             Refresh();
             try
             {
                 Installer.Install(cbAuto.Checked, cbDesktop.Checked, false, cbLaunch.Checked);
-                status.Text = Program.T("Done.", "Fertig.");
+                status.Text = "Done.";
                 MessageBox.Show(this,
-                    Program.T("Nook is installed.\n\nFind it in the Start menu. Remove it any time under Settings > Apps.",
-                              "Nook ist installiert.\n\nDu findest es im Startmenü. Entfernen jederzeit unter Einstellungen > Apps."),
+                    "Nook is installed.\n\nYou'll find it in the Start menu. Remove it any time under Settings > Apps.",
                     "Nook", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 Close();
             }
             catch (Exception ex)
             {
                 status.Text = "";
-                MessageBox.Show(this, Program.T("Setup failed:\n", "Installation fehlgeschlagen:\n") + ex.Message, "Nook Setup", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(this, "Setup failed:\n" + ex.Message, "Nook Setup", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 btnInstall.Enabled = btnCancel.Enabled = true;
             }
         }
