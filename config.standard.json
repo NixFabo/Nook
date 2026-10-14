@@ -1,0 +1,158 @@
+{
+  "version": 1,
+  "language": "en",
+  "position": {
+    "edge": "top",
+    "align": "center",
+    "offset": 8,
+    "sideMargin": 16,
+    "monitor": 0,
+    "dragMode": "reset"
+  },
+  "pill": {
+    "visible": true,
+    "mode": "always",
+    "height": 34,
+    "fontSize": 13,
+    "roundness": 100,
+    "border": false,
+    "order": [
+      "mic",
+      "clock",
+      "date",
+      "timer",
+      "media",
+      "windows"
+    ],
+    "showClock": true,
+    "clock24h": true,
+    "clockSeconds": false,
+    "showDate": false,
+    "dateFormat": "short",
+    "showMedia": true,
+    "mediaWidth": 240,
+    "showMicMuted": true,
+    "showWindows": true,
+    "groupWindows": true,
+    "maxWindowIcons": 12,
+    "iconSize": 0,
+    "clickTab": "start",
+    "wheel": "volume",
+    "middleClick": "close",
+    "lipWidth": 72,
+    "lipThickness": 4,
+    "lipHideMs": 650,
+    "reserveSpace": false,
+    "hideInFullscreen": true
+  },
+  "panel": {
+    "width": 780,
+    "height": 470,
+    "radius": 24,
+    "borderWidth": 0,
+    "shadow": true,
+    "shadowStrength": 0.45,
+    "animStyle": "morph",
+    "animationMs": 240,
+    "closeOnBlur": true,
+    "startTab": "last",
+    "tabStyle": "pill",
+    "tabIcons": "text",
+    "tabAlign": "center",
+    "showClock": true,
+    "showHelpButton": true,
+    "showMenuButton": true
+  },
+  "theme": {
+    "accent": "#D4B266",
+    "background": "#0B0B0C",
+    "gradient": false,
+    "background2": "#1B1A24",
+    "surface": "#161618",
+    "surface2": "#232326",
+    "text": "#F2F2F0",
+    "muted": "#8E8E93",
+    "pillBackground": "#0B0B0C",
+    "border": "",
+    "opacity": 0.98,
+    "cardStyle": "filled",
+    "cardRadius": 18,
+    "font": "Segoe UI Variable Display",
+    "scale": "auto"
+  },
+  "tabs": [
+    "controls",
+    "today",
+    "apps",
+    "taskbar",
+    "clipboard",
+    "power"
+  ],
+  "behavior": {
+    "winKey": true,
+    "winTab": "same",
+    "hotkey": "",
+    "typeToSearch": "apps",
+    "hideWindowsTaskbar": true,
+    "autostart": false
+  },
+  "controls": {
+    "tiles": [
+      "wifi",
+      "bluetooth",
+      "audio",
+      "night",
+      "dark",
+      "mic"
+    ],
+    "showVolume": true,
+    "showMedia": true
+  },
+  "today": {
+    "showWeather": true,
+    "showTimer": true,
+    "showTodos": true,
+    "weatherCity": "",
+    "weatherUnit": "C",
+    "timerPresets": [
+      1,
+      5,
+      10,
+      15,
+      20
+    ]
+  },
+  "apps": {
+    "showFavorites": true,
+    "recentCount": 5,
+    "compact": false,
+    "showKind": true,
+    "quickLinks": [
+      {
+        "name": "Gmail",
+        "target": "https://mail.google.com"
+      }
+    ],
+    "webSearch": "https://www.google.com/search?q=",
+    "hideUninstallers": true
+  },
+  "taskbar": {
+    "group": true
+  },
+  "clipboard": {
+    "enabled": true,
+    "maxItems": 60,
+    "persist": true,
+    "defaultFilter": "all"
+  },
+  "power": {
+    "buttons": [
+      "lock",
+      "sleep",
+      "logoff",
+      "restart",
+      "shutdown"
+    ],
+    "confirm": true
+  }
+}

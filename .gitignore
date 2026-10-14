@@ -1,0 +1,10 @@
+# build output
+*.exe
+*.pdb
+build.log
+build-basic.log
+build-einfach.log
+
+# personal settings and data (created on first start)
+config.json
+data/

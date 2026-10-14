@@ -1,0 +1,52 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Compile Nook.exe
+        shell: pwsh
+        run: |
+          $fw = "$env:WINDIR\Microsoft.NET\Framework64\v4.0.30319"
+          $wm = "$env:WINDIR\System32\WinMetadata"
+          $base = @('/nologo', '/codepage:65001', '/target:winexe', '/optimize+', '/out:Nook.exe', "/lib:$fw\WPF",
+                    '/r:PresentationFramework.dll', '/r:PresentationCore.dll', '/r:WindowsBase.dll', '/r:System.Xaml.dll',
+                    '/r:System.Web.Extensions.dll', '/r:System.Windows.Forms.dll', '/r:System.Drawing.dll', '/r:System.Core.dll',
+                    '/win32icon:nook.ico')
+          $wrt = @('/define:WINRT', "/r:$wm\Windows.Foundation.winmd", "/r:$wm\Windows.Media.winmd", "/r:$wm\Windows.Storage.winmd")
+          foreach ($f in 'System.Runtime.dll', 'System.Runtime.InteropServices.WindowsRuntime.dll', 'System.Threading.Tasks.dll', 'System.IO.dll') {
+            if (Test-Path "$fw\$f") { $wrt += "/r:$fw\$f" }
+          }
+          & "$fw\csc.exe" @base @wrt Nook.cs
+          if ($LASTEXITCODE -ne 0) {
+            Write-Host "::warning::Full variant failed, building the basic variant"
+            & "$fw\csc.exe" @base Nook.cs
+            if ($LASTEXITCODE -ne 0) { exit 1 }
+          }
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Nook
+          path: |
+            Nook.exe
+            config.standard.json
+            README.md
+
+      - name: Publish release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: Nook.exe
+          generate_release_notes: true
