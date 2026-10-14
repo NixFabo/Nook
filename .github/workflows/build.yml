@@ -16,9 +16,22 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Version
+        id: ver
+        shell: pwsh
+        run: |
+          if ($env:GITHUB_REF -like 'refs/tags/v*') { $v = $env:GITHUB_REF_NAME.Substring(1) }
+          else { $v = "dev-" + $env:GITHUB_SHA.Substring(0, 7) }
+          "value=$v" >> $env:GITHUB_OUTPUT
+          Write-Host "Version: $v"
+
       - name: Compile Nook.exe
         shell: pwsh
         run: |
+          $v = "${{ steps.ver.outputs.value }}"
+          # the version shown in Nook's menu = release version
+          (Get-Content Nook.cs -Raw -Encoding UTF8) -replace 'public const string Version = "[^"]*"', ('public const string Version = "' + $v + '"') |
+            Set-Content Nook.cs -Encoding UTF8 -NoNewline
           $fw = "$env:WINDIR\Microsoft.NET\Framework64\v4.0.30319"
           $wm = "$env:WINDIR\System32\WinMetadata"
           $base = @('/nologo', '/codepage:65001', '/target:winexe', '/optimize+', '/out:Nook.exe', "/lib:$fw\WPF",
@@ -31,22 +44,43 @@ jobs:
           }
           & "$fw\csc.exe" @base @wrt Nook.cs
           if ($LASTEXITCODE -ne 0) {
-            Write-Host "::warning::Full variant failed, building the basic variant"
+            Write-Host "::warning::Full variant failed, building the basic variant (no cover art)"
             & "$fw\csc.exe" @base Nook.cs
             if ($LASTEXITCODE -ne 0) { exit 1 }
           }
 
+      - name: Compile NookSetup.exe
+        shell: pwsh
+        run: |
+          $v = "${{ steps.ver.outputs.value }}"
+          @"
+          namespace NookSetup { static class SetupVersion { public const string Value = "$v"; } }
+          "@ | Set-Content installer\SetupVersion.cs -Encoding UTF8
+          $fw = "$env:WINDIR\Microsoft.NET\Framework64\v4.0.30319"
+          & "$fw\csc.exe" /nologo /codepage:65001 /target:winexe /optimize+ /out:NookSetup.exe /win32icon:nook.ico `
+            /win32manifest:installer\setup.manifest /resource:Nook.exe,Nook.exe `
+            /r:System.Windows.Forms.dll /r:System.Drawing.dll /r:System.Web.Extensions.dll `
+            installer\Setup.cs installer\SetupVersion.cs
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+
       - uses: actions/upload-artifact@v4
         with:
-          name: Nook
+          name: Nook-${{ steps.ver.outputs.value }}
           path: |
+            NookSetup.exe
             Nook.exe
-            config.standard.json
-            README.md
 
       - name: Publish release
         if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
         with:
-          files: Nook.exe
+          name: Nook ${{ steps.ver.outputs.value }}
           generate_release_notes: true
+          body: |
+            **NookSetup.exe** – installs Nook for your user (no admin rights), adds a Start menu shortcut and optionally starts it with Windows.
+            **Nook.exe** – portable, just put it in a folder and run it.
+
+            Windows SmartScreen may warn because the files are unsigned: *More info → Run anyway*.
+          files: |
+            NookSetup.exe
+            Nook.exe

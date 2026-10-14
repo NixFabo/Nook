@@ -44,25 +44,34 @@ A small pill at the edge of your screen that expands into a panel for controls, 
 
 ## Get started
 
-### Option A: download
+### Option A: installer (recommended)
 
-1. Download `Nook.exe` from the [latest release](https://github.com/NixFabo/Nook/releases/latest).
-2. Put it in its own folder, e.g. `C:\Tools\Nook`, and start it.
-3. Windows SmartScreen may warn because the file is unsigned: **More info → Run anyway**.
+1. Download **`NookSetup.exe`** from the [latest release](https://github.com/NixFabo/Nook/releases/latest).
+2. Run it and click **Install**. No administrator rights needed: Nook is installed for your user only, to `%LOCALAPPDATA%\Programs\Nook`.
+3. Setup adds a **Start menu** shortcut and, if you leave the box checked, starts Nook **with Windows**. A desktop shortcut is optional.
 
-### Option B: build it yourself (about 10 seconds)
+Updating: run the newer `NookSetup.exe`, your settings stay. Uninstall: *Settings → Apps → Nook*.
+
+Windows SmartScreen may warn because the files are unsigned: **More info → Run anyway**.
+
+### Portable
+
+Download **`Nook.exe`** from the same release, put it in its own folder (e.g. `C:\Tools\Nook`) and run it. Settings are stored next to the exe.
+
+### Build it yourself (about 10 seconds)
 
 ```bat
 git clone https://github.com/NixFabo/Nook.git Nook
 cd Nook
 build.bat
+installer\build-installer.bat   &:: optional, builds NookSetup.exe
 ```
 
 `build.bat` uses `csc.exe` from .NET Framework 4.x, which is part of every Windows 10/11 installation. Nothing gets installed. It builds the **full** variant (media with cover art and seeking) and falls back to a **basic** variant if the Windows media API isn't available.
 
 On first start Nook creates `config.json` and a `data` folder next to the exe.
 
-> **Tip:** to start Nook with Windows, turn on *Settings → General → Start with Windows*.
+> **Start with Windows:** right-click the pill → **Start with Windows**, or *Settings → General → Start with Windows*.
 
 ## Usage
 
@@ -89,7 +98,7 @@ Right-click the pill → **Settings**. Search on the left, options in the middle
 
 | Section | Highlights |
 |---|---|
-| **General** | Language, UI size, Win key, extra global shortcut, type-to-search, Windows taskbar, autostart |
+| **General** | Language, UI size, Win key, extra global shortcut, type-to-search, Windows taskbar, start with Windows |
 | **Pill** | Always / at edge / off · height, font size, roundness, border · order of all elements · clock with seconds, date format · song width · grouped or per-window app icons, icon size · click, scroll and middle-click behavior · edge-line size and delay |
 | **Panel** | Size, radius, border · tab style (pill / underline / text), labels (text / icons / both), alignment · start tab · open effect (morph / fade / slide / none), duration, shadow |
 | **Design** | Presets (some with gradients) · every color · gradient background · card style (filled / outline / flat) and radius · opacity · font |
@@ -146,8 +155,20 @@ Nook.cs               the whole app (C# 5, WPF, .NET Framework 4.x)
 build.bat             one-click build with the compiler built into Windows
 nook.ico              app icon
 config.standard.json  all settings with default values
-.github/workflows     CI build; tags like v1.0.0 publish a release with Nook.exe
+installer/            NookSetup.exe: per-user installer (Setup.cs, manifest, build script)
+.github/workflows     CI build; tags like v1.0.0 publish a release with NookSetup.exe and Nook.exe
 ```
+
+## Releasing
+
+Push a tag and GitHub Actions does the rest:
+
+```bash
+git tag v1.0.0
+git push --tags
+```
+
+The workflow builds `Nook.exe` and `NookSetup.exe`, stamps the version into both and publishes them as a GitHub release.
 
 ## Contributing
 

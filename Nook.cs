@@ -731,6 +731,9 @@ namespace Nook
             { "öffnet und schließt Nook von überall", "opens and closes Nook from anywhere" },
             { "Allgemein", "General" },
             { "Vorschau", "Preview" },
+            { "In der Testversion ohne Wirkung", "No effect in the test version" },
+            { "Nook startet jetzt mit Windows", "Nook now starts with Windows" },
+            { "Nook startet nicht mehr mit Windows", "Nook no longer starts with Windows" },
         };
 
         public static string Tr(string de)
@@ -3074,6 +3077,20 @@ namespace Nook
             catch { }
         }
 
+        // Autostart direkt aus dem Rechtsklick-Menü umschalten (wird in config.json gespeichert)
+        void ToggleAutostart()
+        {
+            bool on = !Cfg.B("behavior.autostart", false);
+            object b;
+            var beh = Cfg.Root.TryGetValue("behavior", out b) ? b as Dictionary<string, object> : null;
+            if (beh == null) { beh = new Dictionary<string, object>(); Cfg.Root["behavior"] = beh; }
+            beh["autostart"] = on;
+            SaveConfig(Cfg.Root);
+            SetAutostart(on);
+            if (Program.IsTest) Pill.Flash(Loc.Tr("In der Testversion ohne Wirkung"), 3, false);
+            else Pill.Flash(on ? Loc.Tr("Nook startet jetzt mit Windows") : Loc.Tr("Nook startet nicht mehr mit Windows"), 3, false);
+        }
+
         // --- Menü, Einstellungen, Reload -----------------------------
         public void ShowMenu(Point screenDip)
         {
@@ -3087,6 +3104,7 @@ namespace Nook
                 MI.Item(Loc.Tr("Config-Ordner öffnen"), "\uE838", closeFirst(OpenConfigFolder)),
                 MI.Item(tbHidden ? Loc.Tr("Windows-Taskleiste zeigen") : Loc.Tr("Windows-Taskleiste ausblenden"), "\uE75B", closeFirst(ToggleWindowsTaskbar)),
                 MI.Item(Loc.Tr("Neu laden"), "\uE72C", Reload),
+                MI.Item(Loc.Tr("Mit Windows starten"), Cfg.B("behavior.autostart", false) ? "\uE73E" : "\uE739", ToggleAutostart),
                 MI.Sep(),
                 MI.Item(Loc.Tr("Nook beenden"), "\uE7E8", Quit),
                 MI.Head("Nook v" + Version + (Program.IsTest ? "  ·  TEST" : ""))

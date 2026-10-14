@@ -12,13 +12,15 @@ Schlanker Ersatz für die Windows-11-Taskleiste: eine kleine Pille am Bildschirm
 
 ## Installieren
 
-1. `Nook.exe` aus dem [neuesten Release](https://github.com/NixFabo/Nook/releases/latest) laden – oder das Repo klonen bzw. als ZIP laden und an einen festen Platz legen, z. B. `C:\Tools\Nook`.
-2. `build.bat` doppelklicken. Daraus entsteht `Nook.exe` – der Compiler steckt schon in Windows, es wird nichts installiert.
-3. `Nook.exe` starten. Beim ersten Start legt Nook `config.json` mit Standardwerten an.
+**Mit Installer (empfohlen):** **`NookSetup.exe`** aus dem [neuesten Release](https://github.com/NixFabo/Nook/releases/latest) laden und ausführen. Ohne Administratorrechte – Nook landet nur für deinen Benutzer in `%LOCALAPPDATA%\Programs\Nook`. Setup legt eine Verknüpfung im **Startmenü** an und startet Nook auf Wunsch **mit Windows** (Desktop-Verknüpfung optional). Update: neuere `NookSetup.exe` ausführen, Einstellungen bleiben. Entfernen: *Einstellungen → Apps → Nook*.
 
-Update: neue `Nook.cs` (und ggf. `build.bat`, `nook.ico`) in den Ordner kopieren, `build.bat` ausführen. `build.bat` beendet ein laufendes Nook vorher selbst. Deine `config.json` und der Ordner `data` bleiben erhalten.
+**Portabel:** `Nook.exe` aus demselben Release in einen eigenen Ordner legen und starten.
 
-SmartScreen-Warnung beim ersten Start: „Weitere Informationen“ → „Trotzdem ausführen“ (selbst gebaut, ohne Signatur).
+**Selbst bauen:** Repo klonen oder als ZIP laden, `build.bat` doppelklicken – der Compiler steckt schon in Windows, es wird nichts installiert. Optional baut `installer\build-installer.bat` danach die `NookSetup.exe`.
+
+SmartScreen-Warnung beim ersten Start: „Weitere Informationen“ → „Trotzdem ausführen“ (ohne Signatur).
+
+**Mit Windows starten:** Rechtsklick auf die Pille → **Mit Windows starten**, oder *Einstellungen → Allgemein → Mit Windows starten*.
 
 ## Bedienen
 
@@ -83,7 +85,8 @@ Die Testversion zeigt „TEST“ im Rechtsklick-Menü und ändert nie den Autost
 
 - `Nook.cs` – das ganze Programm
 - `build.bat` – baut `Nook.exe`
-- `.github/workflows/build.yml` – baut automatisch; Tags wie `v1.0.0` erzeugen ein Release mit `Nook.exe`
+- `installer\` – Installer (`NookSetup.exe`) für den eigenen Benutzer
+- `.github/workflows/build.yml` – baut automatisch; Tags wie `v1.0.0` erzeugen ein Release mit `NookSetup.exe` und `Nook.exe`
 - `nook.ico` – Icon
 - `config.standard.json` – Standardwerte zum Nachschlagen (Nook nutzt `config.json`)
 - `data\` – Favoriten, Verlauf, To-dos, Zwischenablage, `error.log`
