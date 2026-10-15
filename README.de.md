@@ -6,6 +6,10 @@
 
 [English](README.md) · **Deutsch**
 
+<br>
+
+<img src="docs/screenshots/hero.png" alt="Nook-Panel auf dem Windows-Desktop" width="100%">
+
 </div>
 
 Schlanker Ersatz für die Windows-11-Taskleiste: eine kleine Pille am Bildschirmrand, die per Klick oder Win-Taste zu einem Panel mit Tabs aufklappt.
@@ -40,6 +44,16 @@ SmartScreen-Warnung beim ersten Start: „Weitere Informationen“ → „Trotzd
 | F1 im Panel | alle Tastenkürzel |
 
 Kürzel innerhalb der Tabs liegen auf **Alt+Buchstabe**, weil normales Tippen zur Suche springt.
+
+## So sieht es aus
+
+<img src="docs/screenshots/pill.png" alt="Die Nook-Pille" width="640">
+
+| | |
+|---|---|
+| ![Steuerung](docs/screenshots/controls.png) | ![Heute](docs/screenshots/today.png) |
+| ![Apps](docs/screenshots/apps.png) | ![Taskbar](docs/screenshots/taskbar.png) |
+| ![Zwischenablage](docs/screenshots/clipboard.png) | ![Power](docs/screenshots/power.png) |
 
 ## Tabs
 

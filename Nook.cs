@@ -652,7 +652,8 @@ namespace Nook
             { "Lang", "Long" },
             { "Lautstärke-Regler", "Volume slider" },
             { "Linie", "Underline" },
-            { "Links", "Left" },
+            { "Linksbündig", "Left" },
+            { "Rechtsbündig", "Right" },
             { "Maus", "Mouse" },
             { "Mausrad über der Pille", "Scroll wheel over the pill" },
             { "Max. App-Icons", "Max. app icons" },
@@ -3790,6 +3791,18 @@ namespace Nook
             hiddenForPanel = hide;
             if (hide) { HidePeek(); revealed = false; revealUntil = DateTime.MinValue; }
             UpdateVisibility(false);
+            // beim Wiederauftauchen den Inhalt sanft einblenden statt hart zu zeigen
+            if (!hide && textItems != null)
+                textItems.BeginAnimation(OpacityProperty, new DoubleAnimation(0, 1, TimeSpan.FromMilliseconds(180)));
+        }
+
+        // Während das Panel aus der Pille wächst: Inhalt der Pille ausblenden, die Pille selbst bleibt
+        // bis zum Ende der Animation darunter liegen – kein Springen der App-Icons.
+        public void FadeContentForPanel(int ms)
+        {
+            HidePeek();
+            if (textItems != null)
+                textItems.BeginAnimation(OpacityProperty, new DoubleAnimation(0, TimeSpan.FromMilliseconds(Math.Max(60, ms))));
         }
 
         // --- Anzeige-Modus: always = immer, lip = Lippe am Rand, hidden = nie --------
@@ -3913,6 +3926,7 @@ namespace Nook
         public void KeepTopmost()
         {
             if (MenuWindow.Current != null || (peek != null && peek.IsVisible)) return;   // Menüs bleiben vorne
+            if (app.Panel != null && app.Panel.IsOpen) return;                            // Panel liegt über der Pille
             if (IsVisible && Handle != IntPtr.Zero) N.SetWindowPos(Handle, N.HWND_TOPMOST, 0, 0, 0, 0, 0x1 | 0x2 | 0x10);
             if (lip != null) lip.KeepTopmost();
             if (Mode == "lip" && !IsVisible && revealUntil != DateTime.MinValue && DateTime.Now > revealUntil) { revealUntil = DateTime.MinValue; UpdateVisibility(); }
@@ -4562,6 +4576,7 @@ namespace Nook
             {
                 clipGeo = new RectangleGeometry(fromRect, pillRadius, pillRadius);
                 shell.Clip = clipGeo;
+                shell.Opacity = 0;
                 inner.Opacity = 0;
                 innerShift.Y = down ? -10 : 10;
             }
@@ -4578,7 +4593,8 @@ namespace Nook
             N.SetWindowPos(hwnd, N.HWND_TOPMOST, 0, 0, 0, 0, 0x1 | 0x2 | 0x10);
             Activate();
             N.ForceForeground(hwnd);
-            app.OnPanelOpened();
+            // Pille erst nach der Animation verstecken; bis dahin blendet nur ihr Inhalt aus
+            if (anim != "none" && app.Pill != null) app.Pill.FadeContentForPanel((int)(ms * 0.35));
             outside.Start();
             if (cur != null) cur.FocusMain();
 
@@ -4587,6 +4603,8 @@ namespace Nook
             var dur = TimeSpan.FromMilliseconds(ms);
             if (anim == "morph")
             {
+                // Panel-Fläche blendet über der Pille ein, während sie wächst
+                shell.BeginAnimation(OpacityProperty, new DoubleAnimation(0, 1, TimeSpan.FromMilliseconds(Math.Max(40, ms * 0.3))));
                 var ra = new RectAnimation(fromRect, new Rect(0, 0, W, curH), dur) { EasingFunction = ease };
                 ra.Completed += (s, e) => FinishOpen();
                 clipGeo.BeginAnimation(RectangleGeometry.RectProperty, ra);
@@ -4615,6 +4633,7 @@ namespace Nook
             if (!IsOpen || animClosing) return;
             shell.Clip = null;
             opening = false;
+            app.OnPanelOpened();
             if (shadow != null) shadow.BeginAnimation(DropShadowEffect.OpacityProperty, new DoubleAnimation(ShadowOpacity, TimeSpan.FromMilliseconds(140)));
             // Inhalte erst nach der Animation auffrischen – kein Ruckeln währenddessen
             if (cur != null) cur.Shown();
@@ -8121,7 +8140,7 @@ namespace Nook
             Section("panel", "Tab-Leiste",
                 Row(Loc.Tr("Tab-Stil"), null, Seg("panel.tabStyle", O("pill:Pille", "underline:Linie", "text:Nur Text"), null)),
                 Row(Loc.Tr("Tab-Beschriftung"), null, Seg("panel.tabIcons", O("text:Text", "icons:Symbole", "both:Beides"), null)),
-                Row(Loc.Tr("Tabs ausrichten"), null, Seg("panel.tabAlign", O("left:Links", "center:Mitte"), null)),
+                Row(Loc.Tr("Tabs ausrichten"), null, Seg("panel.tabAlign", O("left:Linksbündig", "center:Mitte"), null)),
                 Row(Loc.Tr("Uhr in der Tab-Leiste"), null, Toggle("panel.showClock", null)),
                 Row(Loc.Tr("Hilfe-Knopf"), Loc.Tr("F1 geht immer"), Toggle("panel.showHelpButton", null)),
                 Row(Loc.Tr("Menü-Knopf"), Loc.Tr("Rechtsklick geht immer"), Toggle("panel.showMenuButton", null)));
@@ -8181,7 +8200,7 @@ namespace Nook
             // ===== Position =====
             Section("position", "Position",
                 Row(Loc.Tr("Rand"), null, Seg("position.edge", O("top:Oben", "bottom:Unten"), null)),
-                Row(Loc.Tr("Ausrichtung"), null, Seg("position.align", O("left:Links", "center:Mitte", "right:Rechts"), null)),
+                Row(Loc.Tr("Ausrichtung"), null, Seg("position.align", O("left:Linksbündig", "center:Mitte", "right:Rechtsbündig"), null)),
                 Row(Loc.Tr("Abstand zum Rand"), Loc.Tr("0 = bündig, wie eine Notch"), Slider("position.offset", 0, 40, 1, "px", false)),
                 Row(Loc.Tr("Seitenabstand"), Loc.Tr("nur bei links/rechts"), Slider("position.sideMargin", 0, 300, 2, "px", false)),
                 Row(Loc.Tr("Bildschirm"), Loc.Tr("0 = Hauptbildschirm"), Slider("position.monitor", 0, 4, 1, null, false)));

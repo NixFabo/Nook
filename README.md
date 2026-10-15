@@ -16,6 +16,10 @@ A small pill at the edge of your screen that expands into a panel for controls, 
 
 [Features](#features) · [Get started](#get-started) · [Usage](#usage) · [Customize](#customize) · [FAQ](#faq) · [Deutsch](README.de.md)
 
+<br>
+
+<img src="docs/screenshots/hero.png" alt="Nook panel open on the Windows desktop" width="100%">
+
 </div>
 
 ---
@@ -29,18 +33,58 @@ A small pill at the edge of your screen that expands into a panel for controls, 
 
 ## Features
 
-| Tab | What's inside |
+### The pill
+
+<img src="docs/screenshots/pill.png" alt="The Nook pill: clock, current song and open apps" width="640">
+
+Clock, date, the current song, a running timer, a muted-mic indicator and your open apps. Hover an app to pick one of its windows, right-click for its jump list (e.g. "New incognito window"), scroll to change the volume, drag the pill anywhere. It hides itself in fullscreen games and videos.
+
+### The panel
+
+Press <kbd>Win</kbd> or click the pill and it grows into a panel with six tabs:
+
+<table>
+  <tr>
+    <td width="50%"><img src="docs/screenshots/controls.png" alt="Controls tab"></td>
+    <td width="50%"><img src="docs/screenshots/today.png" alt="Today tab"></td>
+  </tr>
+  <tr>
+    <td><b>Controls</b> · Wi-Fi, Bluetooth, audio, night light, dark mode and mic tiles, volume, media with cover art and seeking. Audio opens a window to switch output devices and set volume per app.</td>
+    <td><b>Today</b> · clock, week overview, timer with presets, to-dos and weather.</td>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/apps.png" alt="Apps tab"></td>
+    <td><img src="docs/screenshots/taskbar.png" alt="Taskbar tab"></td>
+  </tr>
+  <tr>
+    <td><b>Apps</b> · fast search with calculator, favorites, recently used, quick links and web search. Right-click to run as admin, open the file location or uninstall.</td>
+    <td><b>Taskbar</b> · every open window, grouped by app and searchable.</td>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/clipboard.png" alt="Clipboard tab"></td>
+    <td><img src="docs/screenshots/power.png" alt="Power tab"></td>
+  </tr>
+  <tr>
+    <td><b>Clipboard</b> · history with search, filters for text, images and links, preview and pinning.</td>
+    <td><b>Power</b> · lock, sleep, sign out, restart and shut down, with uptime.</td>
+  </tr>
+</table>
+
+### Also
+
+- English and German UI
+- Automatic scaling from Full HD to 4K
+- Hides the Windows taskbar without rearranging your desktop icons
+- Optional global shortcut, start with Windows, per-user installer
+- Test channel that runs next to your stable install
+
+## Requirements
+
+| | |
 |---|---|
-| **Controls** | Wi-Fi, Bluetooth, audio, night light, dark mode and microphone tiles · volume · media card with cover art, progress and seeking · audio window to switch output devices and set volume per app |
-| **Today** | Clock, week overview, timer with presets, to-dos, weather |
-| **Apps** | Fast app search with calculator, favorites, recently used, quick links, web search · right-click: run as admin, file location, uninstall |
-| **Taskbar** | All open windows, grouped by app and searchable |
-| **Clipboard** | History with search, filters (text, images, links) and pinning |
-| **Power** | Lock, sleep, sign out, restart, shut down |
-
-**Pill:** clock, date, current song, running timer, muted-mic indicator and open apps with a hover window picker and jump lists (e.g. "New incognito window"). Scroll to change the volume, drag it anywhere.
-
-**Also:** English and German UI · automatic scaling from Full HD to 4K · hides the Windows taskbar without rearranging desktop icons · optional global shortcut · optional test channel that runs next to your stable install.
+| **OS** | Windows 11 (Windows 10 should work but isn't tested) |
+| **Runtime** | .NET Framework 4.8, already part of Windows 10/11 |
+| **Rights** | No administrator rights needed, installs per user |
 
 ## Get started
 

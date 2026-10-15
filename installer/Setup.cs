@@ -13,6 +13,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
@@ -314,10 +315,19 @@ namespace NookSetup
     {
         static readonly Color Bg = Color.FromArgb(14, 14, 16), Surface = Color.FromArgb(36, 36, 40), Fg = Color.FromArgb(242, 242, 240),
                               Muted = Color.FromArgb(150, 150, 156), Accent = Color.FromArgb(212, 178, 102);
-        readonly CheckBox cbAuto, cbDesktop, cbLaunch;
+        readonly Toggle cbAuto, cbDesktop, cbLaunch;
         readonly Button btnInstall, btnCancel;
         readonly Label status;
         readonly float k;
+
+        [DllImport("dwmapi.dll")] static extern int DwmSetWindowAttribute(IntPtr hwnd, int attr, ref int value, int size);
+
+        // dark title bar (Windows 10 20H1+ / Windows 11)
+        protected override void OnHandleCreated(EventArgs e)
+        {
+            base.OnHandleCreated(e);
+            try { int on = 1; DwmSetWindowAttribute(Handle, 20, ref on, 4); } catch { }
+        }
 
         // pixels at 100 % -> pixels at the current display scaling
         int P(int v) { return (int)Math.Round(v * k); }
@@ -334,31 +344,42 @@ namespace NookSetup
             StartPosition = FormStartPosition.CenterScreen;
             BackColor = Bg; ForeColor = Fg;
             Font = new Font("Segoe UI", 10f);
-            AutoSize = true; AutoSizeMode = AutoSizeMode.GrowAndShrink;
-            Padding = new Padding(P(28), P(22), P(28), P(22));
             try { Icon = Icon.ExtractAssociatedIcon(Assembly.GetExecutingAssembly().Location); } catch { }
 
-            int textW = P(440);
-            var col = new FlowLayoutPanel { FlowDirection = FlowDirection.TopDown, WrapContents = false, AutoSize = true, AutoSizeMode = AutoSizeMode.GrowAndShrink, Margin = new Padding(0) };
+            int pad = P(32), textW = P(420);
+            var col = new FlowLayoutPanel { FlowDirection = FlowDirection.TopDown, WrapContents = false, AutoSize = true, AutoSizeMode = AutoSizeMode.GrowAndShrink, Margin = new Padding(0), Location = new Point(pad, P(28)) };
 
-            var head = new FlowLayoutPanel { FlowDirection = FlowDirection.LeftToRight, WrapContents = false, AutoSize = true, Margin = new Padding(0, 0, 0, P(6)) };
-            head.Controls.Add(new Label { Text = "Nook", Font = new Font("Segoe UI Semibold", 20f), AutoSize = true, ForeColor = Fg, Margin = new Padding(0) });
-            head.Controls.Add(new Label { Text = "v" + SetupVersion.Value, AutoSize = true, ForeColor = Accent, Margin = new Padding(P(6), P(16), 0, 0) });
+            // Header: logo, name, version
+            var head = new FlowLayoutPanel { FlowDirection = FlowDirection.LeftToRight, WrapContents = false, AutoSize = true, Margin = new Padding(0, 0, 0, P(14)) };
+            var logo = Logo(P(44));
+            if (logo != null) head.Controls.Add(new PictureBox { Image = logo, Size = new Size(P(44), P(44)), SizeMode = PictureBoxSizeMode.Zoom, Margin = new Padding(0, P(2), P(14), 0) });
+            var titles = new FlowLayoutPanel { FlowDirection = FlowDirection.TopDown, WrapContents = false, AutoSize = true, Margin = new Padding(0) };
+            titles.Controls.Add(new Label { Text = "Nook", Font = new Font("Segoe UI Semibold", 17f), AutoSize = true, ForeColor = Fg, Margin = new Padding(0) });
+            titles.Controls.Add(new Label { Text = "Version " + SetupVersion.Value, Font = new Font("Segoe UI", 9f), AutoSize = true, ForeColor = Accent, Margin = new Padding(P(2), 0, 0, 0) });
+            head.Controls.Add(titles);
             col.Controls.Add(head);
 
             col.Controls.Add(Text_(installed
                 ? "Nook is already installed. Setup will update it, your settings stay."
                 : "A minimal taskbar replacement for Windows 11. Installed for your user only, no administrator rights needed.",
-                Muted, 10f, textW, P(10)));
-            col.Controls.Add(Text_("Folder: " + Program.InstallDir, Muted, 9f, textW, P(16)));
+                Muted, 10f, textW, P(18)));
 
+            // Options card
+            var card = new FlowLayoutPanel
+            {
+                FlowDirection = FlowDirection.TopDown, WrapContents = false, AutoSize = true, AutoSizeMode = AutoSizeMode.GrowAndShrink,
+                BackColor = Surface, Padding = new Padding(P(18), P(14), P(18), P(8)), Margin = new Padding(0, 0, 0, P(12)),
+                MinimumSize = new Size(textW, 0)
+            };
             cbAuto = Check("Start Nook with Windows", true);
             cbDesktop = Check("Create a desktop shortcut", false);
             cbLaunch = Check("Start Nook when setup is done", true);
-            col.Controls.Add(cbAuto); col.Controls.Add(cbDesktop); col.Controls.Add(cbLaunch);
-            col.Controls.Add(Text_("A Start menu shortcut is always created.", Muted, 9f, textW, P(18)));
+            card.Controls.Add(cbAuto); card.Controls.Add(cbDesktop); card.Controls.Add(cbLaunch);
+            col.Controls.Add(card);
 
-            // bottom row: status left, buttons right
+            col.Controls.Add(Text_("Installs to " + Program.InstallDir + ". A Start menu shortcut is always created.", Muted, 8.5f, textW, P(22)));
+
+            // Bottom row: status left, buttons right
             var bottom = new TableLayoutPanel { ColumnCount = 3, RowCount = 1, AutoSize = true, MinimumSize = new Size(textW, 0), Margin = new Padding(0) };
             bottom.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
             bottom.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
@@ -372,6 +393,9 @@ namespace NookSetup
             col.Controls.Add(bottom);
 
             Controls.Add(col);
+            // Window = content + even margin on all sides
+            var pref = col.GetPreferredSize(Size.Empty);
+            ClientSize = new Size(pref.Width + 2 * pad, pref.Height + P(28) + pad);
             btnCancel.Click += (s, e) => Close();
             btnInstall.Click += (s, e) => DoInstall();
             AcceptButton = btnInstall; CancelButton = btnCancel;
@@ -386,13 +410,26 @@ namespace NookSetup
             };
         }
 
-        CheckBox Check(string text, bool on)
+        [DllImport("user32.dll", CharSet = CharSet.Unicode)]
+        static extern uint PrivateExtractIcons(string file, int index, int cx, int cy, IntPtr[] icons, int[] ids, uint count, uint flags);
+        [DllImport("user32.dll")] static extern bool DestroyIcon(IntPtr h);
+
+        // Logo in the requested size, taken from this exe's own icon (nook.ico)
+        static Image Logo(int size)
         {
-            return new CheckBox
+            try
             {
-                Text = text, Checked = on, AutoSize = true, ForeColor = Fg, BackColor = Bg,
-                FlatStyle = FlatStyle.Standard, Margin = new Padding(0, 0, 0, P(8)), Cursor = Cursors.Hand
-            };
+                var h = new IntPtr[1]; var ids = new int[1];
+                if (PrivateExtractIcons(Assembly.GetExecutingAssembly().Location, 0, size, size, h, ids, 1, 0) == 0 || h[0] == IntPtr.Zero) return null;
+                try { using (var ic = Icon.FromHandle(h[0])) return ic.ToBitmap(); }
+                finally { DestroyIcon(h[0]); }
+            }
+            catch { return null; }
+        }
+
+        Toggle Check(string text, bool on)
+        {
+            return new Toggle(text, on, k, Font) { ForeColor = Fg, BackColor = Surface, Margin = new Padding(0, 0, 0, P(10)) };
         }
 
         Button Btn(string text, bool primary)
@@ -429,6 +466,75 @@ namespace NookSetup
                 MessageBox.Show(this, "Setup failed:\n" + ex.Message, "Nook Setup", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 btnInstall.Enabled = btnCancel.Enabled = true;
             }
+        }
+    }
+
+    // ------------------------------------------------------------------
+    //  Modern switch instead of the system checkbox (looks the same at every DPI)
+    // ------------------------------------------------------------------
+    class Toggle : Control
+    {
+        static readonly Color On = Color.FromArgb(212, 178, 102), Off = Color.FromArgb(70, 70, 76), OffHover = Color.FromArgb(88, 88, 95),
+                              KnobOn = Color.FromArgb(24, 20, 12), KnobOff = Color.FromArgb(220, 220, 224);
+        bool on, hover;
+        readonly float k;
+        readonly Size textSize;
+
+        public bool Checked { get { return on; } set { on = value; Invalidate(); } }
+
+        public Toggle(string text, bool initial, float scale, Font font)
+        {
+            k = scale; on = initial; Text = text; Font = font;
+            SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer | ControlStyles.UserPaint |
+                     ControlStyles.ResizeRedraw | ControlStyles.Selectable, true);
+            TabStop = true; Cursor = Cursors.Hand;
+            textSize = TextRenderer.MeasureText(text, font);
+            Size = new Size(S(40) + S(12) + textSize.Width + S(4), Math.Max(S(28), textSize.Height + S(6)));
+        }
+
+        int S(int v) { return (int)Math.Round(v * k); }
+
+        void Flip() { on = !on; Invalidate(); }
+
+        protected override void OnMouseEnter(EventArgs e) { hover = true; Invalidate(); base.OnMouseEnter(e); }
+        protected override void OnMouseLeave(EventArgs e) { hover = false; Invalidate(); base.OnMouseLeave(e); }
+        protected override void OnMouseUp(MouseEventArgs e) { if (e.Button == MouseButtons.Left) { Focus(); Flip(); } base.OnMouseUp(e); }
+        protected override void OnKeyDown(KeyEventArgs e) { if (e.KeyCode == Keys.Space) { Flip(); e.Handled = true; } base.OnKeyDown(e); }
+        protected override void OnGotFocus(EventArgs e) { Invalidate(); base.OnGotFocus(e); }
+        protected override void OnLostFocus(EventArgs e) { Invalidate(); base.OnLostFocus(e); }
+
+        static GraphicsPath Pill(RectangleF r)
+        {
+            var p = new GraphicsPath();
+            float d = r.Height;
+            p.AddArc(r.X, r.Y, d, d, 90, 180);
+            p.AddArc(r.Right - d, r.Y, d, d, 270, 180);
+            p.CloseFigure();
+            return p;
+        }
+
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            var g = e.Graphics;
+            g.Clear(BackColor);
+            g.SmoothingMode = SmoothingMode.AntiAlias;
+            float w = S(40), h = S(22), y = (Height - h) / 2f;
+            var track = new RectangleF(1, y, w, h);
+            using (var path = Pill(track))
+            using (var br = new SolidBrush(on ? On : (hover ? OffHover : Off)))
+                g.FillPath(br, path);
+            if (Focused)
+            {
+                var f = RectangleF.Inflate(track, S(2) * 0.5f, S(2) * 0.5f);
+                using (var path = Pill(f))
+                using (var pen = new Pen(Color.FromArgb(160, On), Math.Max(1f, k)))
+                    g.DrawPath(pen, path);
+            }
+            float d = h - S(6);
+            float kx = on ? track.Right - S(3) - d : track.X + S(3);
+            using (var kb = new SolidBrush(on ? KnobOn : KnobOff))
+                g.FillEllipse(kb, kx, y + S(3), d, d);
+            TextRenderer.DrawText(g, Text, Font, new Point((int)w + S(12), (Height - textSize.Height) / 2), ForeColor, TextFormatFlags.NoPadding);
         }
     }
 }
