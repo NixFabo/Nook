@@ -34,6 +34,14 @@ using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using Microsoft.Win32;
 
+// Datei-Infos (Explorer → Eigenschaften → Details); die Version setzt der GitHub-Build
+[assembly: AssemblyTitle("Nook")]
+[assembly: AssemblyProduct("Nook")]
+[assembly: AssemblyDescription("A minimal, modern taskbar replacement for Windows 11")]
+[assembly: AssemblyCompany("Nook contributors")]
+[assembly: AssemblyCopyright("Copyright (c) 2026 Nook contributors. MIT License.")]
+[assembly: AssemblyInformationalVersion(Nook.NookApp.Version)]
+
 namespace Nook
 {
     // -----------------------------------------------------------------

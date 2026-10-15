@@ -230,6 +230,28 @@ You'll also find **Support Nook** in the pill's right-click menu. Starring the r
 
 Issues and pull requests are welcome. Nook targets the C# 5 compiler that ships with Windows, so please avoid newer syntax (`$"..."`, `?.`, `nameof`, `out var`, expression-bodied members). The CI build checks every push.
 
+## Privacy
+
+Nook does not collect, store or send any personal data, and has no telemetry.
+It only goes online for one optional feature: if you set a **weather location**, the city name is sent to [Open-Meteo](https://open-meteo.com/) to look up the forecast. Leave the location empty and Nook never connects to the internet.
+Web search and quick links simply open your default browser.
+
+## Code signing policy
+
+<!-- Remove this comment and the line below once SignPath has approved the project:
+Free code signing provided by [SignPath.io](https://about.signpath.io/), certificate by [SignPath Foundation](https://signpath.org/).
+-->
+
+Release binaries (`NookSetup.exe`, `Nook.exe`) are built from this repository by GitHub Actions. Only builds of tagged releases are signed, and every signing request is approved manually.
+
+| Role | Members |
+|---|---|
+| Authors / committers | [NixFabo](https://github.com/NixFabo) |
+| Reviewers | [NixFabo](https://github.com/NixFabo) |
+| Approvers | [NixFabo](https://github.com/NixFabo) |
+
+Changes from outside contributors are merged only after review.
+
 ## License
 
 [MIT](LICENSE)

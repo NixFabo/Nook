@@ -25,6 +25,13 @@ using System.Web.Script.Serialization;
 using System.Windows.Forms;
 using Microsoft.Win32;
 
+[assembly: AssemblyTitle("Nook Setup")]
+[assembly: AssemblyProduct("Nook")]
+[assembly: AssemblyDescription("Installs Nook for the current user")]
+[assembly: AssemblyCompany("Nook contributors")]
+[assembly: AssemblyCopyright("Copyright (c) 2026 Nook contributors. MIT License.")]
+[assembly: AssemblyInformationalVersion(NookSetup.SetupVersion.Value)]
+
 namespace NookSetup
 {
     static class Program
@@ -377,7 +384,8 @@ namespace NookSetup
             card.Controls.Add(cbAuto); card.Controls.Add(cbDesktop); card.Controls.Add(cbLaunch);
             col.Controls.Add(card);
 
-            col.Controls.Add(Text_("Installs to " + Program.InstallDir + ". A Start menu shortcut is always created.", Muted, 8.5f, textW, P(22)));
+            col.Controls.Add(Text_("Installs to " + Program.InstallDir + ". A Start menu shortcut is always created. " +
+                "While Nook runs it hides the Windows taskbar; quitting Nook brings it back (you can turn this off in Nook's settings).", Muted, 8.5f, textW, P(22)));
 
             // Bottom row: status left, buttons right
             var bottom = new TableLayoutPanel { ColumnCount = 3, RowCount = 1, AutoSize = true, MinimumSize = new Size(textW, 0), Margin = new Padding(0) };
