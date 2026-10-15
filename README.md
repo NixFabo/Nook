@@ -13,8 +13,9 @@ A small pill at the edge of your screen that expands into a panel for controls, 
 ![No install](https://img.shields.io/badge/install-none-2ea44f)
 [![Build](https://github.com/NixFabo/Nook/actions/workflows/build.yml/badge.svg)](https://github.com/NixFabo/Nook/actions/workflows/build.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-lightgrey)](LICENSE)
+[![Ko-fi](https://img.shields.io/badge/Ko--fi-Support%20Nook-FF5E5B?logo=kofi&logoColor=white)](https://ko-fi.com/nook)
 
-[Features](#features) · [Get started](#get-started) · [Usage](#usage) · [Customize](#customize) · [FAQ](#faq) · [Deutsch](README.de.md)
+[Features](#features) · [Get started](#get-started) · [Usage](#usage) · [Customize](#customize) · [FAQ](#faq) · [Support](#support) · [Deutsch](README.de.md)
 
 <br>
 
@@ -215,6 +216,15 @@ git push --tags
 ```
 
 The workflow builds `Nook.exe` and `NookSetup.exe`, stamps the version into both and publishes them as a GitHub release.
+
+## Support
+
+Nook is free and open source, and it stays that way: no ads, no tracking, no paid features.
+If it makes your desktop a little nicer, you can buy me a coffee:
+
+<a href="https://ko-fi.com/nook"><img src="https://ko-fi.com/img/githubbutton_sm.svg" alt="Support Nook on Ko-fi"></a>
+
+You'll also find **Support Nook** in the pill's right-click menu. Starring the repo and reporting bugs help just as much. Thank you!
 
 ## Contributing
 

@@ -732,6 +732,9 @@ namespace Nook
             { "öffnet und schließt Nook von überall", "opens and closes Nook from anywhere" },
             { "Allgemein", "General" },
             { "Vorschau", "Preview" },
+            { "Nook unterstützen", "Support Nook" },
+            { "Nook ist kostenlos und Open Source. Ein Kaffee hilft, es weiter zu verbessern.", "Nook is free and open source. A coffee helps keep it improving." },
+            { "Quellcode, Updates und Fehler melden", "Source code, updates and bug reports" },
             { "In der Testversion ohne Wirkung", "No effect in the test version" },
             { "Nook startet jetzt mit Windows", "Nook now starts with Windows" },
             { "Nook startet nicht mehr mit Windows", "Nook no longer starts with Windows" },
@@ -2622,6 +2625,7 @@ namespace Nook
     public class NookApp : Application
     {
         public static event Action<IntPtr> ForegroundChanged;
+        public const string SupportUrl = "https://ko-fi.com/nook";
         public const string Version = "2026.10.14-11";
         public static NookApp I;
         public Cfg Cfg;
@@ -3107,6 +3111,7 @@ namespace Nook
                 MI.Item(Loc.Tr("Neu laden"), "\uE72C", Reload),
                 MI.Item(Loc.Tr("Mit Windows starten"), Cfg.B("behavior.autostart", false) ? "\uE73E" : "\uE739", ToggleAutostart),
                 MI.Sep(),
+                MI.Item(Loc.Tr("Nook unterstützen"), "\uEB51", closeFirst(() => AppIndex.Open(SupportUrl))),
                 MI.Item(Loc.Tr("Nook beenden"), "\uE7E8", Quit),
                 MI.Head("Nook v" + Version + (Program.IsTest ? "  ·  TEST" : ""))
             };
@@ -8289,7 +8294,9 @@ namespace Nook
             var ver = U.T("v" + NookApp.Version + (Program.IsTest ? "  ·  TEST" : ""), 13, Th.Text, FontWeights.SemiBold);
             Section("info", "Nook",
                 Row(Loc.Tr("Version"), Program.IsTest ? Loc.Tr("Testversion – läuft neben der stabilen Version, eigene Einstellungen") : Loc.Tr("Stabile Version"), ver),
-                Row(Loc.Tr("Einstellungsdatei"), Loc.Tr("config.json – zum Sichern oder Teilen"), Button(U.T(Loc.Tr("Ordner öffnen"), 13, Th.Text, FontWeights.SemiBold), false, () => app.OpenConfigFolder())));
+                Row(Loc.Tr("Einstellungsdatei"), Loc.Tr("config.json – zum Sichern oder Teilen"), Button(U.T(Loc.Tr("Ordner öffnen"), 13, Th.Text, FontWeights.SemiBold), false, () => app.OpenConfigFolder())),
+                Row(Loc.Tr("Nook unterstützen"), Loc.Tr("Nook ist kostenlos und Open Source. Ein Kaffee hilft, es weiter zu verbessern."), Button(U.T("Ko-fi ♥", 13, Th.AccentText, FontWeights.Bold), true, () => AppIndex.Open(NookApp.SupportUrl))),
+                Row("GitHub", Loc.Tr("Quellcode, Updates und Fehler melden"), Button(U.T(Loc.Tr("Öffnen"), 13, Th.Text, FontWeights.SemiBold), false, () => AppIndex.Open("https://github.com/NixFabo/Nook"))));
             Section("info", "Tastatur",
                 Note(Loc.Tr("Strg+S speichert  ·  Esc bricht ab  ·  Strg+F sucht  ·  Strg+Bild↑/↓ wechselt den Bereich  ·  Tab springt zum nächsten Feld  ·  Leertaste schaltet  ·  ← → ändert Werte")),
                 Note(Loc.Tr("Im Panel: F1 zeigt alle Tastenkürzel.")));
