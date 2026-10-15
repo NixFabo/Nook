@@ -18,6 +18,8 @@ Schlanker Ersatz für die Windows-11-Taskleiste: eine kleine Pille am Bildschirm
 
 **Mit Installer (empfohlen):** **`NookSetup.exe`** aus dem [neuesten Release](https://github.com/NixFabo/Nook/releases/latest) laden und ausführen. Ohne Administratorrechte – Nook landet nur für deinen Benutzer in `%LOCALAPPDATA%\Programs\Nook`. Setup legt eine Verknüpfung im **Startmenü** an und startet Nook auf Wunsch **mit Windows** (Desktop-Verknüpfung optional). Update: neuere `NookSetup.exe` ausführen, Einstellungen bleiben. Entfernen: *Einstellungen → Apps → Nook*.
 
+<img src="docs/screenshots/installer.png" alt="Nook Setup" width="420">
+
 **Portabel:** `Nook.exe` aus demselben Release in einen eigenen Ordner legen und starten.
 
 **Selbst bauen:** Repo klonen oder als ZIP laden, `build.bat` doppelklicken – der Compiler steckt schon in Windows, es wird nichts installiert. Optional baut `installer\build-installer.bat` danach die `NookSetup.exe`.
@@ -112,6 +114,15 @@ Die Testversion zeigt „TEST“ im Rechtsklick-Menü und ändert nie den Autost
 - Bluetooth und Nachtmodus öffnen die Windows-Einstellungen, statt direkt zu schalten.
 - `build.bat` baut zuerst die volle Variante (Medien mit Cover und Spulen). Klappt das nicht, entsteht eine einfache Variante – der Grund steht in `build.log`.
 - Die laufende Version steht unten im Rechtsklick-Menü. Fehler landen in `data\error.log`.
+
+## Unterstützen
+
+Nook ist kostenlos und Open Source und bleibt es auch: keine Werbung, kein Tracking, keine Bezahlfunktionen.
+Wenn dir Nook gefällt, freue ich mich über einen Kaffee:
+
+<a href="https://ko-fi.com/nook"><img src="https://ko-fi.com/img/githubbutton_sm.svg" alt="Nook auf Ko-fi unterstützen"></a>
+
+Den Link findest du auch im Rechtsklick-Menü der Pille unter **Nook unterstützen**. Ein Stern fürs Repo und Fehlermeldungen helfen genauso. Danke!
 
 ## Lizenz
 

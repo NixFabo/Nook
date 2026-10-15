@@ -94,6 +94,8 @@ Press <kbd>Win</kbd> or click the pill and it grows into a panel with six tabs:
 2. Run it and click **Install**. No administrator rights needed: Nook is installed for your user only, to `%LOCALAPPDATA%\Programs\Nook`.
 3. Setup adds a **Start menu** shortcut and, if you leave the box checked, starts Nook **with Windows**. A desktop shortcut is optional.
 
+<img src="docs/screenshots/installer.png" alt="Nook Setup" width="420">
+
 Updating: run the newer `NookSetup.exe`, your settings stay. Uninstall: *Settings → Apps → Nook*.
 
 Windows SmartScreen may warn because the files are unsigned: **More info → Run anyway**.

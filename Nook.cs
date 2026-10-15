@@ -3798,11 +3798,15 @@ namespace Nook
 
         // Während das Panel aus der Pille wächst: Inhalt der Pille ausblenden, die Pille selbst bleibt
         // bis zum Ende der Animation darunter liegen – kein Springen der App-Icons.
-        public void FadeContentForPanel(int ms)
+        public void FadeContentForPanel(int ms, Action done)
         {
             HidePeek();
-            if (textItems != null)
-                textItems.BeginAnimation(OpacityProperty, new DoubleAnimation(0, TimeSpan.FromMilliseconds(Math.Max(60, ms))));
+            if (!IsVisible || textItems == null) { if (done != null) done(); return; }
+            // kurz über das Panel legen, ohne den Fokus zu nehmen
+            if (Handle != IntPtr.Zero) N.SetWindowPos(Handle, N.HWND_TOPMOST, 0, 0, 0, 0, 0x1 | 0x2 | 0x10);
+            var a = new DoubleAnimation(0, TimeSpan.FromMilliseconds(Math.Max(60, ms)));
+            if (done != null) a.Completed += (s, e) => done();
+            textItems.BeginAnimation(OpacityProperty, a);
         }
 
         // --- Anzeige-Modus: always = immer, lip = Lippe am Rand, hidden = nie --------
@@ -4576,7 +4580,7 @@ namespace Nook
             {
                 clipGeo = new RectangleGeometry(fromRect, pillRadius, pillRadius);
                 shell.Clip = clipGeo;
-                shell.Opacity = 0;
+                shell.Opacity = 0;          // bis der erste Frame gezeichnet ist
                 inner.Opacity = 0;
                 innerShift.Y = down ? -10 : 10;
             }
@@ -4594,17 +4598,36 @@ namespace Nook
             Activate();
             N.ForceForeground(hwnd);
             // Pille erst nach der Animation verstecken; bis dahin blendet nur ihr Inhalt aus
-            if (anim != "none" && app.Pill != null) app.Pill.FadeContentForPanel((int)(ms * 0.35));
             outside.Start();
             if (cur != null) cur.FocusMain();
 
             if (anim == "none") { FinishOpen(); return; }
+
+            // Erst loslegen, wenn das Fenster wirklich gezeichnet ist – sonst verschluckt der erste
+            // (langsame) Frame den Anfang der Animation und das Panel "springt" auf.
+            int frames = 0;
+            EventHandler start = null;
+            start = (s0, e0) =>
+            {
+                if (++frames < 2) return;
+                CompositionTarget.Rendering -= start;
+                if (!IsOpen || animClosing) return;
+                BeginOpenAnimation(anim, ms, clipGeo, fromRect, r);
+            };
+            CompositionTarget.Rendering += start;
+        }
+
+        void BeginOpenAnimation(string anim, int ms, RectangleGeometry clipGeo, Rect fromRect, double r)
+        {
             var ease = new QuarticEase { EasingMode = EasingMode.EaseOut };
             var dur = TimeSpan.FromMilliseconds(ms);
+            // Die Pille liegt kurz über dem Panel und blendet ihren Inhalt aus – dann wird sie versteckt.
+            // So "verwandelt" sich die Pille ins Panel, statt dass etwas drüberspringt.
+            if (app.Pill != null)
+                app.Pill.FadeContentForPanel((int)(ms * 0.35), () => { if (IsOpen && !animClosing) app.OnPanelOpened(); });
             if (anim == "morph")
             {
-                // Panel-Fläche blendet über der Pille ein, während sie wächst
-                shell.BeginAnimation(OpacityProperty, new DoubleAnimation(0, 1, TimeSpan.FromMilliseconds(Math.Max(40, ms * 0.3))));
+                shell.BeginAnimation(OpacityProperty, null); shell.Opacity = 1;
                 var ra = new RectAnimation(fromRect, new Rect(0, 0, W, curH), dur) { EasingFunction = ease };
                 ra.Completed += (s, e) => FinishOpen();
                 clipGeo.BeginAnimation(RectangleGeometry.RectProperty, ra);
